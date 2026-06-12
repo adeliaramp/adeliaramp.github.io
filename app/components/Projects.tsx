@@ -120,9 +120,13 @@ export default function Projects() {
         if (!res.ok) throw new Error(`GitHub API returned ${res.status}`)
         const data: (Repo & { fork: boolean })[] = await res.json()
 
-        // Keep portfolio projects only: drop forks and the profile config repo
+        // Keep portfolio projects only: drop forks, the profile config repo,
+        // and this site's own repo
         const portfolio = data.filter(
-          (repo) => !repo.fork && repo.name !== 'adeliaramp'
+          (repo) =>
+            !repo.fork &&
+            repo.name !== 'adeliaramp' &&
+            repo.name !== 'adeliaramp.github.io'
         )
         setRepos(portfolio)
       } catch {
