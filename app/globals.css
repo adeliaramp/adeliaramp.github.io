@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  /* Keeps section headings visible below the sticky navbar when anchor-scrolling */
+  scroll-padding-top: 5rem;
+}
+
+body {
+  @apply bg-cream text-charcoal antialiased;
+}
+
+::selection {
+  @apply bg-dusty-blue/40;
+}
