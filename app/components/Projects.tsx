@@ -11,6 +11,19 @@ type Repo = {
   stargazers_count: number | null
 }
 
+// Hand-picked repos for the grid, in display order. Everything else on the
+// account (older case studies, the profile config repo, this site) stays off
+// the page. To feature a new project, add its repo name here and to
+// fallbackRepos below.
+const shownRepoNames = [
+  'ride-share-cancellation-behavior',
+  'transaction-fraud-detection',
+  'seller-quality-dbt',
+  'ab-testing-express-checkout',
+  'cancellation-unsupervised-ml',
+  'connectly-churn-reduction',
+]
+
 // Shown if the GitHub API call fails (rate limit, offline). These are real
 // repos with their real descriptions, copied from the API. Star counts are
 // omitted here on purpose: they only render when fetched live.
@@ -118,16 +131,12 @@ export default function Projects() {
           'https://api.github.com/users/adeliaramp/repos?per_page=100&sort=updated'
         )
         if (!res.ok) throw new Error(`GitHub API returned ${res.status}`)
-        const data: (Repo & { fork: boolean })[] = await res.json()
+        const data: Repo[] = await res.json()
 
-        // Keep portfolio projects only: drop forks, the profile config repo,
-        // and this site's own repo
-        const portfolio = data.filter(
-          (repo) =>
-            !repo.fork &&
-            repo.name !== 'adeliaramp' &&
-            repo.name !== 'adeliaramp.github.io'
-        )
+        // Keep the curated list only, in the order defined above
+        const portfolio = shownRepoNames
+          .map((name) => data.find((repo) => repo.name === name))
+          .filter((repo): repo is Repo => repo !== undefined)
         setRepos(portfolio)
       } catch {
         setRepos(fallbackRepos)

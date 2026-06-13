@@ -10,10 +10,22 @@ type MediumPost = {
 
 const MEDIUM_FEED_URL = 'https://medium.com/feed/@adeliaramp'
 const MEDIUM_PROFILE_URL = 'https://medium.com/@adeliaramp'
-const POST_COUNT = 6
+
+// The Medium feed mixes work-related writing with personal essays, so the
+// posts shown here are hand-picked. Each entry is the trailing id from the
+// post URL. To show a new post, add its id; the first id is the featured one.
+const featuredPostId = 'ae2c930638cc' // Learning Python as a Data Analyst
+const shownPostIds = [
+  featuredPostId,
+  'd53f27e7d870', // I Was the Slowest Data Analyst on the Team
+  'a45a200f86ff', // I Stopped Trying to Learn Everything
+  'dc12d8bda409', // "Make It Stick" Changed How I Study Data Analytics
+  'a532aee3cb6e', // I Did Not Pass. And Then I Had to Go Home.
+]
 
 // Runs once at build time (static export), so posts refresh on each deploy.
-// The deploy workflow also rebuilds weekly to pick up new posts.
+// The deploy workflow also rebuilds weekly, but a new post only appears after
+// its id is added to shownPostIds above.
 async function getMediumPosts(): Promise<MediumPost[]> {
   try {
     const res = await fetch(MEDIUM_FEED_URL)
@@ -26,7 +38,7 @@ async function getMediumPosts(): Promise<MediumPost[]> {
     let items = parsed?.rss?.channel?.item ?? []
     if (!Array.isArray(items)) items = [items]
 
-    return items.slice(0, POST_COUNT).map((item: Record<string, string>) => {
+    const allPosts: MediumPost[] = items.map((item: Record<string, string>) => {
       const content: string = item['content:encoded'] ?? ''
 
       // First image in the post body doubles as the thumbnail
@@ -50,6 +62,15 @@ async function getMediumPosts(): Promise<MediumPost[]> {
         thumbnail: imageMatch ? imageMatch[1] : null,
       }
     })
+
+    // Keep hand-picked posts only, featured one first, the rest newest first
+    // (the feed already arrives in date order)
+    const shown = allPosts.filter((post) =>
+      shownPostIds.some((id) => post.link.endsWith(id))
+    )
+    const featured = shown.find((post) => post.link.endsWith(featuredPostId))
+    if (!featured) return shown
+    return [featured, ...shown.filter((post) => post !== featured)]
   } catch {
     // Network hiccup at build time: render the section with a profile link only
     return []

@@ -33,7 +33,7 @@ export default function Timeline() {
           Experience
         </h2>
         <p className="mt-3 text-warm-gray">
-          The short version. The full one is in the resume.
+          The short version. The longer one is on LinkedIn.
         </p>
 
         <ol className="relative mt-10 space-y-10 border-l-2 border-dusty-blue/30 pl-8">
@@ -61,14 +61,14 @@ export default function Timeline() {
             <span className="h-2 w-2 rounded-full bg-dusty-rose" aria-hidden="true" />
             Available for new opportunities
           </span>
-          {/* Replace public/resume.pdf with the real file; the link stays the same */}
+          {/* No resume download on purpose: resumes are tailored per application */}
           <a
-            href="/resume.pdf"
+            href="https://linkedin.com/in/adeliaramp"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-medium text-dusty-blue hover:underline"
           >
-            Download resume (PDF) &rarr;
+            Full history on LinkedIn &rarr;
           </a>
         </div>
       </div>

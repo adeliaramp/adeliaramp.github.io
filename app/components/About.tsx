@@ -29,9 +29,11 @@ export default function About() {
             decision becomes obvious.
           </p>
           <p>
-            I am looking for a senior analyst or analytics engineer role on a
-            team where analysts sit close to the decision, in Europe or APAC.
-            If your team argues about metric definitions, I will fit right in.
+            I am looking for a senior data analyst or analytics engineer role
+            in Europe or APAC, on a team where analysts sit close to the
+            decision. I am based in Jakarta, open to relocation, and will need
+            visa sponsorship for most European roles. If your team argues
+            about metric definitions, I will fit right in.
           </p>
         </div>
 
