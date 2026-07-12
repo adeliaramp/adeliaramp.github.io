@@ -8,10 +8,10 @@ export default function About() {
 
         <div className="mt-8 space-y-5 text-base leading-relaxed text-warm-gray sm:text-lg">
           <p>
-            I did not start in data. I started in pharmacy, where I learned that
-            a wrong number is never just a number: someone downstream acts on
-            it. That habit of treating every figure as a decision waiting to
-            happen followed me when I switched careers, and it never left.
+            I treat every number as a decision waiting to happen, because
+            someone downstream always acts on it. That habit came from an
+            earlier career in healthcare, long before my first SQL query, and
+            it never left.
           </p>
           <p>
             My first data role was at Prixa.ai, a health tech startup, where I
@@ -29,11 +29,9 @@ export default function About() {
             decision becomes obvious.
           </p>
           <p>
-            I am looking for a senior data analyst or analytics engineer role
-            in Europe or APAC, on a team where analysts sit close to the
-            decision. I am based in Jakarta, open to relocation, and will need
-            visa sponsorship for most European roles. If your team argues
-            about metric definitions, I will fit right in.
+            I am based in Jakarta and happiest on teams where analysts sit
+            close to the decision. If your team argues about metric
+            definitions, I will fit right in.
           </p>
         </div>
 
@@ -44,8 +42,8 @@ export default function About() {
           <ul className="mt-4 space-y-2.5 text-warm-gray">
             <li className="flex items-start gap-3">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-dusty-blue" aria-hidden="true" />
-              Interviewing for Senior Data Analyst and Analytics Engineer roles
-              in Europe and APAC
+              Senior Data Analyst at Gojek, deep in cancellation analytics and
+              fraud feature engineering
             </li>
             <li className="flex items-start gap-3">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-dusty-blue" aria-hidden="true" />
