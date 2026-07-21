@@ -16,6 +16,7 @@ type Repo = {
 // the page. To feature a new project, add its repo name here and to
 // fallbackRepos below.
 const shownRepoNames = [
+  'revenue-retention-analytics',
   'ride-share-cancellation-behavior',
   'transaction-fraud-detection',
   'seller-quality-dbt',
@@ -28,6 +29,15 @@ const shownRepoNames = [
 // repos with their real descriptions, copied from the API. Star counts are
 // omitted here on purpose: they only render when fetched live.
 const fallbackRepos: Repo[] = [
+  {
+    name: 'revenue-retention-analytics',
+    description:
+      'Cohort and lifetime value study of a digital storefront. Follows 60K users across a year to show acquisition channel value splitting about 5.5 to 1 ($235 vs $43 per user over 12 months), traces 64% of the gap to retention rather than price, and sizes a first order retention experiment with a power analysis. Built with Python, DuckDB, and BigQuery SQL.',
+    html_url: 'https://github.com/adeliaramp/revenue-retention-analytics',
+    language: 'Jupyter Notebook',
+    topics: ['cohort-analysis', 'retention', 'revenue-analytics', 'python', 'sql', 'bigquery'],
+    stargazers_count: null,
+  },
   {
     name: 'ride-share-cancellation-behavior',
     description:
