@@ -21,8 +21,9 @@ export default function Hero() {
           Data Analyst
         </p>
         <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-warm-gray sm:text-lg">
-          I turn messy operational data into decisions teams actually make.
-          Four years across health tech, e-commerce fraud, and ride-hailing.
+          I turn complex business data into trusted metrics, clear explanations,
+          and decisions teams can act on. Experience across ride-hailing,
+          e-commerce, and health tech.
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
