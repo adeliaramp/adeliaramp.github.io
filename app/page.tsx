@@ -1,10 +1,10 @@
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
-import About from './components/About'
-import Skills from './components/Skills'
 import Projects from './components/Projects'
-import Blog from './components/Blog'
 import Timeline from './components/Timeline'
+import Skills from './components/Skills'
+import About from './components/About'
+import Blog from './components/Blog'
 import Contact from './components/Contact'
 
 export default function Home() {
@@ -13,11 +13,11 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <About />
-        <Skills />
         <Projects />
-        <Blog />
         <Timeline />
+        <Skills />
+        <About />
+        <Blog />
         <Contact />
       </main>
     </>
