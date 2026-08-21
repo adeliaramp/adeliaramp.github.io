@@ -18,7 +18,7 @@ export default function Hero() {
           Adelia Ramadhani Putri
         </h1>
         <p className="mt-4 text-lg font-medium text-warm-gray sm:text-xl">
-          Senior Data Analyst
+          Data Analyst
         </p>
         <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-warm-gray sm:text-lg">
           I turn messy operational data into decisions teams actually make.

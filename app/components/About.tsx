@@ -42,7 +42,7 @@ export default function About() {
           <ul className="mt-4 space-y-2.5 text-warm-gray">
             <li className="flex items-start gap-3">
               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-dusty-blue" aria-hidden="true" />
-              Senior Data Analyst at Gojek, deep in cancellation analytics and
+              Data Analyst at Gojek, deep in cancellation analytics and
               fraud feature engineering
             </li>
             <li className="flex items-start gap-3">

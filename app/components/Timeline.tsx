@@ -1,7 +1,7 @@
 const entries = [
   {
     company: 'Gojek',
-    role: 'Senior Data Analyst',
+    role: 'Data Analyst',
     years: '2025 - Present',
     summary:
       'Own ride and car order cancellation analytics. Engineer behavioral features for fraud detection models.',
