@@ -1,272 +1,340 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-
-type Repo = {
-  name: string
-  description: string | null
-  html_url: string
-  language: string | null
-  topics: string[]
-  stargazers_count: number | null
+type ProjectLink = {
+  label: string
+  href: string
 }
 
-// Hand-picked repos for the grid, in display order. Everything else on the
-// account (older case studies, the profile config repo, this site) stays off
-// the page. To feature a new project, add its repo name here and to
-// fallbackRepos below.
-const shownRepoNames = [
-  'revenue-retention-analytics',
-  'ride-share-cancellation-behavior',
-  'transaction-fraud-detection',
-  'seller-quality-dbt',
-  'ab-testing-express-checkout',
-  'cancellation-unsupervised-ml',
-  'connectly-churn-reduction',
-]
-
-// Shown if the GitHub API call fails (rate limit, offline). These are real
-// repos with their real descriptions, copied from the API. Star counts are
-// omitted here on purpose: they only render when fetched live.
-const fallbackRepos: Repo[] = [
-  {
-    name: 'revenue-retention-analytics',
-    description:
-      'Cohort and lifetime value study of a digital storefront. Follows 60K users across a year to show acquisition channel value splitting about 5.5 to 1 ($235 vs $43 per user over 12 months), traces 64% of the gap to retention rather than price, and sizes a first order retention experiment with a power analysis. Built with Python, DuckDB, and BigQuery SQL.',
-    html_url: 'https://github.com/adeliaramp/revenue-retention-analytics',
-    language: 'Jupyter Notebook',
-    topics: ['cohort-analysis', 'retention', 'revenue-analytics', 'python', 'sql', 'bigquery'],
-    stargazers_count: null,
-  },
-  {
-    name: 'ride-share-cancellation-behavior',
-    description:
-      'Analyzed 9.14M NYC taxi trips using survival analysis (Cox PH, HR = 1.92) and A/B testing to identify a 22.6× surge cancellation gap, uncover opposing subgroup effects hidden in a null aggregate result, and size $654K in quarterly revenue at risk, producing segment-level rollout recommendations.',
-    html_url: 'https://github.com/adeliaramp/ride-share-cancellation-behavior',
-    language: 'Jupyter Notebook',
-    topics: [],
-    stargazers_count: null,
-  },
-  {
-    name: 'transaction-fraud-detection',
-    description:
-      'Behavioral anomaly scoring system for e-commerce fraud detection. Engineers 18 features across 80K users (velocity, refunds, device, payment health, temporal patterns), trains an Isolation Forest, and assigns risk tiers, achieving 50.5% precision at High Risk with $165,936 net savings per scoring cycle.',
-    html_url: 'https://github.com/adeliaramp/transaction-fraud-detection',
-    language: 'Jupyter Notebook',
-    topics: ['fraud-detection', 'machine-learning', 'python'],
-    stargazers_count: null,
-  },
-  {
-    name: 'seller-quality-dbt',
-    description:
-      'Seller quality scoring pipeline built with dbt and DuckDB. Transforms 100K orders from the Olist dataset into a daily seller scorecard with composite scoring, tier assignment, and SCD Type 2 tier history.',
-    html_url: 'https://github.com/adeliaramp/seller-quality-dbt',
-    language: null,
-    topics: ['analytics-engineering', 'data-pipeline', 'dbt', 'duckdb', 'e-commerce', 'python', 'sql'],
-    stargazers_count: null,
-  },
-  {
-    name: 'ab-testing-express-checkout',
-    description:
-      'End-to-end A/B test analysis of an Express Checkout feature: statistical testing, novelty-effect detection, segmentation, and a production-ready Python utility library.',
-    html_url: 'https://github.com/adeliaramp/ab-testing-express-checkout',
-    language: 'Jupyter Notebook',
-    topics: ['a-b-testing', 'experimentation', 'hypothesis-testing', 'pandas', 'python', 'statistics'],
-    stargazers_count: null,
-  },
-  {
-    name: 'cancellation-unsupervised-ml',
-    description:
-      'KMeans user segmentation by cancellation behavior in ride-hailing. 2M synthetic orders, 6 archetypes, end-to-end unsupervised ML pipeline.',
-    html_url: 'https://github.com/adeliaramp/cancellation-unsupervised-ml',
-    language: 'Jupyter Notebook',
-    topics: [],
-    stargazers_count: null,
-  },
-  {
-    name: 'connectly-churn-reduction',
-    description:
-      'Churn Reduction Analytics: Connectly SaaS — EDA, behavioral modeling, A/B experiment design, and statistical evaluation',
-    html_url: 'https://github.com/adeliaramp/connectly-churn-reduction',
-    language: 'Jupyter Notebook',
-    topics: [],
-    stargazers_count: null,
-  },
-]
-
-// GitHub reports most of these repos as "Jupyter Notebook", so filters are
-// derived from topics, language, and description keywords instead.
-function deriveTags(repo: Repo): string[] {
-  const haystack = [
-    repo.language ?? '',
-    repo.topics.join(' '),
-    repo.description ?? '',
-  ]
-    .join(' ')
-    .toLowerCase()
-
-  const tags: string[] = []
-  if (/jupyter|python|pandas/.test(haystack)) tags.push('Python')
-  if (/\bsql\b|duckdb|bigquery/.test(haystack)) tags.push('SQL')
-  if (/\bdbt\b/.test(haystack)) tags.push('dbt')
-  return tags
-}
-
-// "ab-testing-express-checkout" -> "AB Testing Express Checkout"
-function formatRepoName(name: string): string {
-  const specialWords: Record<string, string> = {
-    ab: 'A/B',
-    ml: 'ML',
-    dbt: 'dbt',
+type FeaturedProject = {
+  title: string
+  eyebrow: string
+  question: string
+  finding: string
+  decision: string
+  limitations: string
+  tags: string[]
+  chart: {
+    type: 'image' | 'seller-tiers'
+    src?: string
+    alt: string
+    caption: string
   }
-  return name
-    .split(/[-_]/)
-    .map((word) => specialWords[word] ?? word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
+  links: ProjectLink[]
 }
 
-const filters = ['All', 'Python', 'SQL', 'dbt'] as const
-type Filter = (typeof filters)[number]
+const featuredProjects: FeaturedProject[] = [
+  {
+    title: 'Revenue Retention Analytics',
+    eyebrow: 'Growth & financial analytics',
+    question:
+      'Which acquisition channels produce durable revenue, and where should the next growth dollar go?',
+    finding:
+      'Twelve-month value split 5.5 to 1 across channels ($235 vs $43 per user), with retention explaining 64% of the gap.',
+    decision:
+      'Hold new Display spend flat, shift budget toward Email and Organic, and test a first-order retention intervention.',
+    limitations:
+      'Results use a reproducible, schema-matched simulation. Channel effects are associative rather than causal.',
+    tags: ['Python', 'SQL', 'DuckDB', 'BigQuery'],
+    chart: {
+      type: 'image',
+      src: 'https://raw.githubusercontent.com/adeliaramp/revenue-retention-analytics/main/assets/decomp.png',
+      alt: 'Decomposition of the lifetime value gap between acquisition channels',
+      caption: 'Retention, not price, explains most of the channel value gap.',
+    },
+    links: [
+      {
+        label: 'Case study',
+        href: 'https://adeliaramp.github.io/revenue-retention-analytics/reports/case-study.html',
+      },
+      {
+        label: 'Code',
+        href: 'https://github.com/adeliaramp/revenue-retention-analytics',
+      },
+      {
+        label: 'Methodology',
+        href: 'https://github.com/adeliaramp/revenue-retention-analytics/blob/main/project-design.md',
+      },
+    ],
+  },
+  {
+    title: 'Ride-Share Cancellation Behavior',
+    eyebrow: 'Product analytics & experimentation',
+    question:
+      'Where are cancellations concentrated, and should a wait-time redesign roll out broadly?',
+    finding:
+      'Across 9.14M trips, surge conditions showed a 22.6× cancellation gap. A null aggregate test masked opposing segment effects.',
+    decision:
+      'Do not roll out broadly. Validate the overnight result with a randomized test and treat airport pickup friction separately.',
+    limitations:
+      'Cancellation and surge are inferred proxies, and the intervention analysis uses a temporal split rather than randomized assignment.',
+    tags: ['Python', 'Survival Analysis', 'A/B Testing', 'SQL'],
+    chart: {
+      type: 'image',
+      src: 'https://raw.githubusercontent.com/adeliaramp/ride-share-cancellation-behavior/main/outputs/03c_hte_forest_plot.png',
+      alt: 'Forest plot of heterogeneous treatment effects by ride segment',
+      caption: 'Opposing segment effects disappear when only the aggregate is reviewed.',
+    },
+    links: [
+      {
+        label: 'Case study',
+        href: 'https://github.com/adeliaramp/ride-share-cancellation-behavior#readme',
+      },
+      {
+        label: 'Code',
+        href: 'https://github.com/adeliaramp/ride-share-cancellation-behavior/tree/main/notebooks',
+      },
+      {
+        label: 'Methodology',
+        href: 'https://github.com/adeliaramp/ride-share-cancellation-behavior/blob/main/docs/limitations.md',
+      },
+    ],
+  },
+  {
+    title: 'Seller Quality dbt',
+    eyebrow: 'Analytics engineering',
+    question:
+      'How can marketplace operations identify degrading sellers before customer impact becomes visible?',
+    finding:
+      'The pipeline scored 1,794 sellers and identified 123 for suspension. High GMV did not consistently imply high quality.',
+    decision:
+      'Give operations a daily scorecard with tier history, investigate degrading sellers, and replace signals that do not discriminate.',
+    limitations:
+      'The Olist source is a static export; synthetic seed data demonstrates tier history, and 93% of trajectory flags default to stable.',
+    tags: ['dbt', 'SQL', 'DuckDB', 'Data Quality'],
+    chart: {
+      type: 'seller-tiers',
+      alt: 'Distribution of scored sellers across quality tiers',
+      caption: '123 sellers triggered the suspension rule despite a gold-heavy distribution.',
+    },
+    links: [
+      {
+        label: 'Case study',
+        href: 'https://github.com/adeliaramp/seller-quality-dbt#readme',
+      },
+      {
+        label: 'Code',
+        href: 'https://github.com/adeliaramp/seller-quality-dbt/blob/main/models/marts/analytics/mrt_seller_quality_scorecard.sql',
+      },
+      {
+        label: 'Methodology',
+        href: 'https://github.com/adeliaramp/seller-quality-dbt#key-engineering-decisions',
+      },
+    ],
+  },
+]
+
+const moreProjects = [
+  {
+    title: 'Transaction Fraud Detection',
+    description:
+      'A reproducible simulation of behavioral anomaly scoring, risk tiers, and review-cost tradeoffs across 80K users.',
+    label: 'Simulation',
+    href: 'https://github.com/adeliaramp/transaction-fraud-detection',
+  },
+  {
+    title: 'A/B Testing Express Checkout',
+    description:
+      'An end-to-end experiment analysis covering power, novelty effects, segmentation, and rollout decisions.',
+    label: 'Experimentation',
+    href: 'https://github.com/adeliaramp/ab-testing-express-checkout',
+  },
+  {
+    title: 'Cancellation Unsupervised ML',
+    description:
+      'K-means segmentation of 2M synthetic ride-hailing orders into six behavioral archetypes.',
+    label: 'Simulation',
+    href: 'https://github.com/adeliaramp/cancellation-unsupervised-ml',
+  },
+  {
+    title: 'Connectly Churn Reduction',
+    description:
+      'SaaS churn analysis combining behavioral exploration, experiment design, and statistical evaluation.',
+    label: 'Product analytics',
+    href: 'https://github.com/adeliaramp/connectly-churn-reduction',
+  },
+]
+
+const sellerTiers = [
+  { label: 'Platinum', count: 188, share: 10.5 },
+  { label: 'Gold', count: 1465, share: 81.7 },
+  { label: 'Silver', count: 17, share: 0.9 },
+  { label: 'Bronze', count: 1, share: 0.1 },
+  { label: 'Suspended', count: 123, share: 6.9 },
+]
+
+function SellerTierChart() {
+  return (
+    <div
+      className="rounded-xl border border-dusty-blue/15 bg-white p-5"
+      role="img"
+      aria-label="Seller tier distribution: 188 platinum, 1,465 gold, 17 silver, 1 bronze, and 123 suspended"
+    >
+      <p className="text-sm font-semibold text-charcoal">Scored seller distribution</p>
+      <p className="mt-1 text-xs text-warm-gray">1,794 sellers with sufficient order history</p>
+      <div className="mt-5 space-y-3">
+        {sellerTiers.map((tier) => (
+          <div key={tier.label}>
+            <div className="mb-1 flex items-center justify-between text-xs">
+              <span className="font-medium text-charcoal">{tier.label}</span>
+              <span className="text-warm-gray">
+                {tier.count.toLocaleString('en-US')} · {tier.share}%
+              </span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-dusty-blue/10">
+              <div
+                className={`h-full rounded-full ${
+                  tier.label === 'Suspended' ? 'bg-dusty-rose' : 'bg-dusty-blue'
+                }`}
+                style={{ width: `${Math.max(tier.share, 1.5)}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ProjectLinks({ links }: { links: ProjectLink[] }) {
+  return (
+    <div className="mt-6 flex flex-wrap gap-x-5 gap-y-3">
+      {links.map((link) => (
+        <a
+          key={link.label}
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-medium text-dusty-blue underline decoration-dusty-blue/40 underline-offset-4 hover:text-charcoal"
+        >
+          {link.label} <span aria-hidden="true">↗</span>
+        </a>
+      ))}
+    </div>
+  )
+}
 
 export default function Projects() {
-  const [repos, setRepos] = useState<Repo[]>([])
-  const [usedFallback, setUsedFallback] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [activeFilter, setActiveFilter] = useState<Filter>('All')
-
-  useEffect(() => {
-    async function loadRepos() {
-      try {
-        const res = await fetch(
-          'https://api.github.com/users/adeliaramp/repos?per_page=100&sort=updated'
-        )
-        if (!res.ok) throw new Error(`GitHub API returned ${res.status}`)
-        const data: Repo[] = await res.json()
-
-        // Keep the curated list only, in the order defined above
-        const portfolio = shownRepoNames
-          .map((name) => data.find((repo) => repo.name === name))
-          .filter((repo): repo is Repo => repo !== undefined)
-        setRepos(portfolio)
-      } catch {
-        setRepos(fallbackRepos)
-        setUsedFallback(true)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadRepos()
-  }, [])
-
-  const visibleRepos =
-    activeFilter === 'All'
-      ? repos
-      : repos.filter((repo) => deriveTags(repo).includes(activeFilter))
-
   return (
     <section id="projects" className="bg-cream py-20 sm:py-24">
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <h2 className="font-serif text-3xl font-semibold text-charcoal sm:text-4xl">
-          Portfolio Projects
+          Featured Case Studies
         </h2>
         <p className="mt-3 max-w-2xl text-warm-gray">
-          Public analyses and pipelines, pulled straight from my GitHub.
+          Three decision-focused projects showing how I frame questions, test evidence,
+          and turn analysis into a recommended action.
         </p>
 
-        {/* Filter buttons */}
-        <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Filter projects by tool">
-          {filters.map((filter) => (
-            <button
-              key={filter}
-              type="button"
-              onClick={() => setActiveFilter(filter)}
-              aria-pressed={activeFilter === filter}
-              className={`rounded-full px-4 py-1.5 text-sm transition ${
-                activeFilter === filter
-                  ? 'bg-dusty-blue text-white shadow-sm'
-                  : 'border border-dusty-blue/40 bg-white text-warm-gray hover:bg-dusty-blue/10'
-              }`}
+        <div className="mt-10 space-y-8">
+          {featuredProjects.map((project) => (
+            <article
+              key={project.title}
+              className="overflow-hidden rounded-2xl border border-dusty-blue/15 bg-white shadow-sm"
             >
-              {filter}
-            </button>
-          ))}
-        </div>
+              <div className="grid lg:grid-cols-5">
+                <figure className="flex flex-col justify-center bg-dusty-blue/5 p-5 sm:p-7 lg:col-span-2">
+                  {project.chart.type === 'image' && project.chart.src ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={project.chart.src}
+                      alt={project.chart.alt}
+                      className="aspect-[4/3] w-full rounded-xl border border-dusty-blue/15 bg-white object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <SellerTierChart />
+                  )}
+                  <figcaption className="mt-3 text-sm leading-relaxed text-warm-gray">
+                    {project.chart.caption}
+                  </figcaption>
+                </figure>
 
-        {loading && <p className="mt-10 text-warm-gray">Loading projects from GitHub...</p>}
-
-        {!loading && (
-          <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleRepos.map((repo) => (
-              <li key={repo.name}>
-                <article className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="font-serif text-lg font-semibold leading-snug text-charcoal">
-                      <a
-                        href={repo.html_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-dusty-blue"
-                      >
-                        {formatRepoName(repo.name)}
-                      </a>
-                    </h3>
-                    <a
-                      href={repo.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${formatRepoName(repo.name)} on GitHub`}
-                      className="shrink-0 text-warm-gray transition hover:text-charcoal"
-                    >
-                      <svg viewBox="0 0 16 16" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
-                      </svg>
-                    </a>
-                  </div>
-
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-warm-gray">
-                    {repo.description ?? 'No description yet.'}
+                <div className="p-6 sm:p-8 lg:col-span-3">
+                  <p className="text-xs font-medium uppercase tracking-wider text-dusty-blue">
+                    {project.eyebrow}
                   </p>
+                  <h3 className="mt-2 font-serif text-2xl font-semibold text-charcoal">
+                    {project.title}
+                  </h3>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    {deriveTags(repo).map((tag) => (
-                      <span
+                  <dl className="mt-6 space-y-4">
+                    <div>
+                      <dt className="text-sm font-semibold text-charcoal">Business question</dt>
+                      <dd className="mt-1 leading-relaxed text-warm-gray">{project.question}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-semibold text-charcoal">Key finding</dt>
+                      <dd className="mt-1 leading-relaxed text-warm-gray">{project.finding}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-semibold text-charcoal">Recommended decision</dt>
+                      <dd className="mt-1 leading-relaxed text-warm-gray">{project.decision}</dd>
+                    </div>
+                    <div className="rounded-xl bg-cream px-4 py-3">
+                      <dt className="text-sm font-semibold text-charcoal">Data limitations</dt>
+                      <dd className="mt-1 text-sm leading-relaxed text-warm-gray">
+                        {project.limitations}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tools and methods">
+                    {project.tags.map((tag) => (
+                      <li
                         key={tag}
                         className="rounded-full bg-dusty-rose/20 px-2.5 py-1 text-xs text-charcoal"
                       >
                         {tag}
-                      </span>
+                      </li>
                     ))}
-                    {/* Stars come from the live API only; fallback cards skip them */}
-                    {repo.stargazers_count !== null && repo.stargazers_count > 0 && (
-                      <span className="ml-auto text-xs text-warm-gray">
-                        &#9733; {repo.stargazers_count}
-                      </span>
-                    )}
-                  </div>
-                </article>
-              </li>
-            ))}
-          </ul>
-        )}
+                  </ul>
 
-        {!loading && visibleRepos.length === 0 && (
-          <p className="mt-8 text-warm-gray">No projects match this filter yet.</p>
-        )}
+                  <ProjectLinks links={project.links} />
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
 
-        {usedFallback && (
-          <p className="mt-6 text-sm text-warm-gray">
-            Showing a snapshot of selected projects. See all of them on{' '}
+        <div className="mt-16">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h3 className="font-serif text-2xl font-semibold text-charcoal">More projects</h3>
+              <p className="mt-2 text-warm-gray">
+                Additional work in experimentation, segmentation, fraud, and churn.
+              </p>
+            </div>
             <a
               href="https://github.com/adeliaramp"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-charcoal"
+              className="text-sm font-medium text-dusty-blue hover:underline"
             >
-              GitHub
+              All projects on GitHub <span aria-hidden="true">↗</span>
             </a>
-            .
-          </p>
-        )}
+          </div>
+
+          <ul className="mt-7 grid gap-4 sm:grid-cols-2">
+            {moreProjects.map((project) => (
+              <li key={project.title}>
+                <a
+                  href={project.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex h-full flex-col rounded-2xl border border-dusty-blue/15 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <span className="text-xs font-medium uppercase tracking-wider text-dusty-blue">
+                    {project.label}
+                  </span>
+                  <span className="mt-2 font-serif text-lg font-semibold text-charcoal group-hover:text-dusty-blue">
+                    {project.title}
+                  </span>
+                  <span className="mt-2 text-sm leading-relaxed text-warm-gray">
+                    {project.description}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   )

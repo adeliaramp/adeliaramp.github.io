@@ -1,5 +1,4 @@
 const contactLinks = [
-  { label: 'Email', href: 'mailto:adeliaramp@gmail.com', text: 'adeliaramp@gmail.com' },
   { label: 'GitHub', href: 'https://github.com/adeliaramp', text: 'github.com/adeliaramp' },
   { label: 'LinkedIn', href: 'https://linkedin.com/in/adeliaramp', text: 'linkedin.com/in/adeliaramp' },
   { label: 'Medium', href: 'https://medium.com/@adeliaramp', text: 'medium.com/@adeliaramp' },
@@ -13,78 +12,61 @@ export default function Contact() {
           Get in Touch
         </h2>
         <p className="mt-3 max-w-2xl text-warm-gray">
-          Hiring for a data team, or just want to talk shop about experiments
-          and fraud patterns? My inbox is open.
+          Interested in analytics, measurement, or building trustworthy metrics?
+          I am always happy to exchange ideas.
         </p>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-2">
-          {/* Direct links */}
-          <ul className="space-y-4">
-            {contactLinks.map((item) => (
-              <li key={item.label}>
-                <p className="text-sm text-warm-gray">{item.label}</p>
-                <a
-                  href={item.href}
-                  target={item.href.startsWith('mailto:') ? undefined : '_blank'}
-                  rel={item.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                  className="font-medium text-charcoal underline decoration-dusty-blue/50 underline-offset-4 hover:text-dusty-blue"
-                >
-                  {item.text}
-                </a>
-              </li>
-            ))}
-          </ul>
+        <div className="mt-10 grid gap-6 lg:grid-cols-5">
+          <div className="rounded-2xl border border-dusty-blue/15 bg-cream/70 p-6 sm:p-8 lg:col-span-2">
+            <h3 className="font-serif text-xl font-semibold text-charcoal">
+              Find me elsewhere
+            </h3>
+            <ul className="mt-6 space-y-5">
+              {contactLinks.map((item) => (
+                <li key={item.label}>
+                  <p className="text-sm text-warm-gray">{item.label}</p>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-charcoal underline decoration-dusty-blue/50 underline-offset-4 hover:text-dusty-blue"
+                  >
+                    {item.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          {/* Contact form via Formspree (free tier, no backend).
-              Replace YOUR_FORMSPREE_ID with the form ID from formspree.io */}
-          <form
-            action="https://formspree.io/f/YOUR_FORMSPREE_ID"
-            method="POST"
-            className="rounded-2xl bg-white p-6 shadow-sm sm:p-8"
-          >
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-charcoal">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                className="mt-1.5 w-full rounded-lg border border-dusty-blue/30 bg-cream px-3.5 py-2.5 text-charcoal focus:border-dusty-blue focus:outline-none focus:ring-1 focus:ring-dusty-blue"
-              />
+          <div className="flex flex-col justify-center rounded-2xl bg-white p-6 shadow-sm sm:p-8 lg:col-span-3">
+            <p className="text-xs font-medium uppercase tracking-wider text-dusty-blue">
+              Start a conversation
+            </p>
+            <h3 className="mt-2 font-serif text-2xl font-semibold text-charcoal sm:text-3xl">
+              Let&apos;s talk data
+            </h3>
+            <p className="mt-4 max-w-xl leading-relaxed text-warm-gray">
+              Have a question, an idea, or an interesting data problem? Email is
+              the best way to reach me, and I will get back to you as soon as I can.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="mailto:adeliaramp@gmail.com?subject=Hello%20Adelia"
+                className="inline-flex items-center justify-center rounded-full bg-dusty-blue px-7 py-3 font-medium text-white shadow-sm transition hover:bg-dusty-blue/85"
+              >
+                Email me
+              </a>
+              <a
+                href="https://linkedin.com/in/adeliaramp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-full border border-dusty-rose bg-white px-7 py-3 font-medium text-charcoal shadow-sm transition hover:bg-dusty-rose/15"
+              >
+                Connect on LinkedIn
+              </a>
             </div>
-            <div className="mt-4">
-              <label htmlFor="email" className="block text-sm font-medium text-charcoal">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                className="mt-1.5 w-full rounded-lg border border-dusty-blue/30 bg-cream px-3.5 py-2.5 text-charcoal focus:border-dusty-blue focus:outline-none focus:ring-1 focus:ring-dusty-blue"
-              />
-            </div>
-            <div className="mt-4">
-              <label htmlFor="message" className="block text-sm font-medium text-charcoal">
-                Message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={4}
-                required
-                className="mt-1.5 w-full rounded-lg border border-dusty-blue/30 bg-cream px-3.5 py-2.5 text-charcoal focus:border-dusty-blue focus:outline-none focus:ring-1 focus:ring-dusty-blue"
-              />
-            </div>
-            <button
-              type="submit"
-              className="mt-6 w-full rounded-full bg-dusty-blue px-8 py-3 font-medium text-white shadow-sm transition hover:bg-dusty-blue/85"
-            >
-              Send Message
-            </button>
-          </form>
+            <p className="mt-4 text-sm text-warm-gray">adeliaramp@gmail.com</p>
+          </div>
         </div>
 
         <footer className="mt-16 border-t border-dusty-blue/20 pt-6 text-center text-sm text-warm-gray">
